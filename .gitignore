@@ -1,0 +1,15 @@
+# Ignore Visual Studio specific files
+.vs/
+*.user
+*.suo
+*.vcxproj.*
+*.csproj.user
+*.cache
+*.pdb
+
+# Ignore bin and obj directories
+bin/
+obj/
+
+# Ignore build artifacts
+Build/
