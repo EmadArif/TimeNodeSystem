@@ -1,6 +1,6 @@
 ﻿
 using TimeAndAttendanceSystem.Controls;
-using TimeAndAttendanceSystem.Nodes;
+using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
 namespace TimeAndAttendanceSystem.Helpers
 {

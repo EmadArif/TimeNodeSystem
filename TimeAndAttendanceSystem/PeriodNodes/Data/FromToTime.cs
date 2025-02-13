@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TimeAndAttendanceSystem.Helpers.Attributes;
+using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
 namespace TimeAndAttendanceSystem.PeriodNodes.Data
 {
-    public struct FromToTime
+    public class FromToTime : IFromToTime
     {
         public string Name { get; set; }
         public TimeSpan EarlyFrom { get; set; } = new TimeSpan(0, 0, 0);
@@ -17,10 +18,6 @@ namespace TimeAndAttendanceSystem.PeriodNodes.Data
         public TimeSpan LateTo { get; set; } = new TimeSpan(23, 59, 59);
         public int MinutesAllowed { get; set; } = 0;
 
-        public FromToTime()
-        {
-            
-        }
 
         public TimeSpan Time { get
             {

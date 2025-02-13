@@ -1,4 +1,4 @@
-﻿using TimeAndAttendanceSystem.Nodes;
+﻿using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
 namespace TimeAndAttendanceSystem.Controls
 {

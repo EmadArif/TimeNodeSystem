@@ -1,21 +1,18 @@
-﻿
-using System.Xml.Linq;
-using TimeAndAttendanceSystem.Nodes;
+﻿using TimeAndAttendanceSystem.Helpers.Extensions;
+using TimeAndAttendanceSystem.PeriodNodes.Abstructs;
 using TimeAndAttendanceSystem.PeriodNodes.Data;
 
 namespace TimeAndAttendanceSystem.PeriodNodes
 {
-   
-    public class NDaysTimeNode : ChildNode
-    {
-        public List<FromToTime> DayTimes = [];
 
+    public class NDaysTimeNode : NTimesChildNodeBase
+    {
         public override object Clone()
         {
             var clone = (NDaysTimeNode)this.MemberwiseClone();
 
             // Reset the Children list to an empty list
-            clone.DayTimes = [
+            clone.Times = [
                    new  FromToTime{
                     Name = "Each Day"
                 }
@@ -23,18 +20,20 @@ namespace TimeAndAttendanceSystem.PeriodNodes
 
             return clone;
         }
-        public override bool Calculate(YearCalendar calendar, DateTime currentDate, int dayIndex)
+        public override bool Calculate(YearCalendar calendar, int dayIndex)
         {
-            if (DayTimes == null || DayTimes.Count == 0)
+            if (Times == null || Times.Count == 0)
                 return false;
 
-            int index = (dayIndex % DayTimes.Count);
-            calendar.FromTime = DateTime.Parse(DayTimes[index].From.ToString());
-            calendar.ToTime = DateTime.Parse(DayTimes[index].To.ToString());
-
+            if(calendar.Enabled)
+            {
+                int index = (dayIndex % Times.Count);
+                calendar.FromTime = Times[index].From.ToDateTime();
+                calendar.ToTime = Times[index].To.ToDateTime();
+            }
+            
             return true;
         }
-
 
         public bool ValidateDayOne(TimeSpan dayOneFrom, TimeSpan dayOneTo)
         {

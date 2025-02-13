@@ -36,6 +36,7 @@
             txtName = new TextBox();
             dataGridView1 = new DataGridView();
             btnNew = new Button();
+            ColEnable = new DataGridViewCheckBoxColumn();
             ColId = new DataGridViewTextBoxColumn();
             ColDay = new DataGridViewTextBoxColumn();
             ColEarlyFrom = new BasicExample.DataGridViewColumns.TimePickerColumn();
@@ -111,7 +112,7 @@
             dataGridView1.AllowUserToResizeRows = false;
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { ColId, ColDay, ColEarlyFrom, ColFrom, ColTo, ColLateTo, ColTimeAllowed, ColTime, ColDelete });
+            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { ColEnable, ColId, ColDay, ColEarlyFrom, ColFrom, ColTo, ColLateTo, ColTimeAllowed, ColTime, ColDelete });
             tableLayoutPanel1.SetColumnSpan(dataGridView1, 2);
             dataGridView1.Dock = DockStyle.Top;
             dataGridView1.Location = new Point(3, 59);
@@ -131,6 +132,14 @@
             btnNew.TabIndex = 7;
             btnNew.Text = "+";
             btnNew.UseVisualStyleBackColor = true;
+            // 
+            // ColEnable
+            // 
+            ColEnable.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            ColEnable.HeaderText = "";
+            ColEnable.MinimumWidth = 6;
+            ColEnable.Name = "ColEnable";
+            ColEnable.Width = 6;
             // 
             // ColId
             // 
@@ -241,6 +250,7 @@
         private TextBox txtName;
         private DataGridView dataGridView1;
         private Button btnNew;
+        private DataGridViewCheckBoxColumn ColEnable;
         private DataGridViewTextBoxColumn ColId;
         private DataGridViewTextBoxColumn ColDay;
         private BasicExample.DataGridViewColumns.TimePickerColumn ColEarlyFrom;

@@ -1,6 +1,8 @@
-﻿namespace TimeAndAttendanceSystem.Nodes
+﻿using TimeAndAttendanceSystem.PeriodNodes.Abstructs;
+
+namespace TimeAndAttendanceSystem.Nodes
 {
-    public class MonthlyNode : ChildNode
+    public class MonthlyNode : ChildNodeBase
     {
     }
 }

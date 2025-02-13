@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
-namespace TimeAndAttendanceSystem.Nodes
+namespace TimeAndAttendanceSystem.PeriodNodes.Abstructs
 {
-    public abstract class ParentNode : IParentNode
+    public abstract class ParentNodeBase : IParentNode
     {
         public required string Id { get; set; }
         public required string Name { get; set; }
@@ -14,14 +15,14 @@ namespace TimeAndAttendanceSystem.Nodes
         public Action<INode>? OnValueUpdated { get; set; }
         public List<INode> Children { get; set; } = [];
 
-        public virtual bool Calculate(YearCalendar calendar, DateTime currentDate, int dayIndex)
+        public virtual bool Calculate(YearCalendar calendar, int dayIndex)
         {
             return true;
         }
 
         public virtual object Clone()
         {
-            var clone = (ParentNode)this.MemberwiseClone();
+            var clone = (ParentNodeBase)MemberwiseClone();
 
             // Reset the Children list to an empty list
             clone.Children = [];
@@ -31,7 +32,7 @@ namespace TimeAndAttendanceSystem.Nodes
 
         public virtual void Initalize(INode parentNode)
         {
-            
+
         }
     }
 

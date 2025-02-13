@@ -1,18 +1,30 @@
 ﻿using TimeAndAttendanceSystem.Helpers.Extensions;
-using TimeAndAttendanceSystem.PeriodNodes;
+using TimeAndAttendanceSystem.PeriodNodes.Abstructs;
 using TimeAndAttendanceSystem.PeriodNodes.Data;
+using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
 namespace TimeAndAttendanceSystem.Controls
 {
     public partial class NTimesTableControl : UserControl
     {
-        private NDaysTimeNode _node;
+        private ChildNodeBase _node;
         public Action? OnSave;
 
-        public NTimesTableControl(NDaysTimeNode node)
+        public NTimesTableControl(ChildNodeBase node)
         {
             InitializeComponent();
+
             _node = node;
+
+            if(_node is WeeklyTimeNodeBase)
+            {
+                btnNew.Enabled = false;
+                btnNew.Visible = false;
+            }
+            else
+            {
+                dataGridView1.Columns[ColEnable.Index].Visible = false;
+            }
 
             dataGridView1.AddIntegerTextColumn(ColTimeAllowed.Index);
 
@@ -22,27 +34,38 @@ namespace TimeAndAttendanceSystem.Controls
 
             dataGridView1.CallDgvRowDirty((r) =>
             {
-                if (r.Index >= _node.DayTimes.Count)
-                    return true;
+                if (_node is IFromToTimeList timeList)
+                {
+                    if (r.Index >= timeList.GetTimes.Count())
+                        return true;
 
-                var earlyFrom = DateTime.Parse(r.Cells[ColEarlyFrom.Index].Value.ToString()!).ToHH_MM_TT();
-                var from = DateTime.Parse(r.Cells[ColFrom.Index].Value.ToString()!).ToHH_MM_TT();
-                var to = DateTime.Parse(r.Cells[ColTo.Index].Value.ToString()!).ToHH_MM_TT();
-                var lateTo = DateTime.Parse(r.Cells[ColLateTo.Index].Value.ToString()!).ToHH_MM_TT();
-                var timeAllowed = int.Parse(r.Cells[ColTimeAllowed.Index].Value?.ToString()!);
+                    var earlyFrom = DateTime.Parse(r.Cells[ColEarlyFrom.Index].Value!.ToString()!).ToHH_MM_TT();
+                    var from = DateTime.Parse(r.Cells[ColFrom.Index].Value!.ToString()!).ToHH_MM_TT();
+                    var to = DateTime.Parse(r.Cells[ColTo.Index].Value!.ToString()!).ToHH_MM_TT();
+                    var lateTo = DateTime.Parse(r.Cells[ColLateTo.Index].Value!.ToString()!).ToHH_MM_TT();
+                    var timeAllowed = int.Parse(r.Cells[ColTimeAllowed.Index].Value!.ToString()!);
 
-                var dayName = r.Cells[ColDay.Index].Value.ToString();
-                var day = _node.DayTimes[r.Index];
+                    var dayName = r.Cells[ColDay.Index].Value?.ToString();
+                    var day = timeList.GetTimes.ElementAt(r.Index);
 
-                var dayEarlyFrom = day.EarlyFrom.ToDateTime().ToHH_MM_TT();
-                var dayFrom = day.From.ToDateTime().ToHH_MM_TT();
+                    var dayEarlyFrom = day.EarlyFrom.ToDateTime().ToHH_MM_TT();
+                    var dayFrom = day.From.ToDateTime().ToHH_MM_TT();
 
-                var dayTo = day.To.ToDateTime().ToHH_MM_TT();
-                var dayLateTo = day.LateTo.ToDateTime().ToHH_MM_TT();
+                    var dayTo = day.To.ToDateTime().ToHH_MM_TT();
+                    var dayLateTo = day.LateTo.ToDateTime().ToHH_MM_TT();
 
+                    bool isValuesChanged = dayFrom != from || dayTo != to || dayName != day.Name
+                    || earlyFrom != dayEarlyFrom || lateTo != dayLateTo || timeAllowed != day.MinutesAllowed;
 
-                return dayFrom != from || dayTo != to || dayName != day.Name 
-                || earlyFrom != dayEarlyFrom || lateTo != dayLateTo || timeAllowed != day.MinutesAllowed;
+                    if (day is ISwitchable sw)
+                    {
+                        var isEnabled = Convert.ToBoolean(r.Cells[ColEnable.Index].Value);
+                        return isValuesChanged || sw.Enabled != isEnabled;
+                    }
+
+                    return isValuesChanged;
+                }
+                return false;
             });
 
             dataGridView1.CellMouseDown += DataGridView1_CellMouseDown;
@@ -97,31 +120,54 @@ namespace TimeAndAttendanceSystem.Controls
 
         private void BtnSave_Click(object? sender, EventArgs e)
         {
-            _node.DayTimes.Clear();
-
-            foreach (DataGridViewRow row in dataGridView1.Rows)
+            if (_node is IFromToTimeList timeList)
             {
-                if (row.Index < 0)
-                    continue;
+                List<IFromToTime> times = timeList.GetTimes.ToList();
 
-                var earlyFrom = DateTime.Parse(row.Cells[ColEarlyFrom.Index].Value.ToString()).TimeOfDay;
-                var from = DateTime.Parse(row.Cells[ColFrom.Index].Value.ToString()).TimeOfDay;
-                var to = DateTime.Parse(row.Cells[ColTo.Index].Value.ToString()).TimeOfDay;
-                var lateTo = DateTime.Parse(row.Cells[ColLateTo.Index].Value.ToString()).TimeOfDay;
-                var minutesAllowed = int.Parse(row.Cells[ColTimeAllowed.Index].Value.ToString());
-                var x = new FromToTime
+                if (timeList.GetTimes is not List<WeeklyFromToTime>)
+                    timeList.ClearTimes();
+
+                foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
-                    Name = row.Cells[ColDay.Index].Value.ToString(),
+                    if (row.Index < 0)
+                        continue;
 
-                    EarlyFrom = earlyFrom,
-                    From = from,
-                    To = to,
-                    LateTo = lateTo,
-                    MinutesAllowed = minutesAllowed,
-                };
+                    var earlyFrom = DateTime.Parse(row.Cells[ColEarlyFrom.Index].Value.ToString()).TimeOfDay;
+                    var from = DateTime.Parse(row.Cells[ColFrom.Index].Value.ToString()).TimeOfDay;
+                    var to = DateTime.Parse(row.Cells[ColTo.Index].Value.ToString()).TimeOfDay;
+                    var lateTo = DateTime.Parse(row.Cells[ColLateTo.Index].Value.ToString()).TimeOfDay;
+                    var minutesAllowed = int.Parse(row.Cells[ColTimeAllowed.Index].Value.ToString());
 
-                _node.DayTimes.Add(x);
+                    IFromToTime? newValue = null;
+
+                    if (timeList.GetTimes is List<WeeklyFromToTime> w)
+                    {
+                        var enabled = bool.Parse(row.Cells[ColEnable.Index].Value.ToString());
+
+                        w[row.Index].EarlyFrom = earlyFrom;
+                        w[row.Index].From = from;
+                        w[row.Index].To = to;
+                        w[row.Index].LateTo = lateTo;
+                        w[row.Index].MinutesAllowed = minutesAllowed;
+                        w[row.Index].Enabled = enabled;
+                    }
+                    else if(_node is NTimesChildNodeBase)
+                    {
+                        newValue = new FromToTime
+                        {
+                            Name = row.Cells[ColDay.Index].Value.ToString(),
+
+                            EarlyFrom = earlyFrom,
+                            From = from,
+                            To = to,
+                            LateTo = lateTo,
+                            MinutesAllowed = minutesAllowed,
+                        };
+                        timeList.AddTime(newValue);
+                    }
+                }
             }
+           
 
             _node.Name = txtName.Text;
 
@@ -143,24 +189,34 @@ namespace TimeAndAttendanceSystem.Controls
             // Set the DataGridView height
             dataGridView.Height = headerHeight + totalRowHeight + padding;
         }
-        public void SetControls(NDaysTimeNode node)
+        public void SetControls(ChildNodeBase node)
         {
             dataGridView1.Rows.Clear();
-
-            for (int i = 0; i < _node.DayTimes.Count; i++)
+            if (_node is IFromToTimeList timeList)
             {
-                int rowId = dataGridView1.Rows.Add();
 
-                dataGridView1.Rows[rowId].Cells[ColDay.Index].Value = _node.DayTimes[i].Name;
+                for (int i = 0; i < timeList.GetTimes.Count(); i++)
+                {
+                    int rowId = dataGridView1.Rows.Add();
+                    var value = timeList.GetTimes.ElementAt(i);
 
-                dataGridView1.Rows[rowId].Cells[ColEarlyFrom.Index].Value = _node.DayTimes[i].EarlyFrom.ToDateTime().ToHH_MM_TT();
-                dataGridView1.Rows[rowId].Cells[ColFrom.Index].Value = _node.DayTimes[i].From.ToDateTime().ToHH_MM_TT();
-                dataGridView1.Rows[rowId].Cells[ColTo.Index].Value = _node.DayTimes[i].To.ToDateTime().ToHH_MM_TT();
-                dataGridView1.Rows[rowId].Cells[ColLateTo.Index].Value = _node.DayTimes[i].LateTo.ToDateTime().ToHH_MM_TT();
+                    if (timeList.GetTimes.ElementAt(i) is ISwitchable sw)
+                    {
+                        dataGridView1.Rows[rowId].Cells[ColEnable.Index].Value = sw.Enabled;
+                    }
+
+                    dataGridView1.Rows[rowId].Cells[ColDay.Index].Value = value.Name;
+
+                    dataGridView1.Rows[rowId].Cells[ColEarlyFrom.Index].Value = value.EarlyFrom.ToDateTime().ToHH_MM_TT();
+                    dataGridView1.Rows[rowId].Cells[ColFrom.Index].Value = value.From.ToDateTime().ToHH_MM_TT();
+                    dataGridView1.Rows[rowId].Cells[ColTo.Index].Value = value.To.ToDateTime().ToHH_MM_TT();
+                    dataGridView1.Rows[rowId].Cells[ColLateTo.Index].Value = value.LateTo.ToDateTime().ToHH_MM_TT();
                 
-                dataGridView1.Rows[rowId].Cells[ColTimeAllowed.Index].Value = _node.DayTimes[i].MinutesAllowed;
-                dataGridView1.Rows[rowId].Cells[ColTime.Index].Value = (_node.DayTimes[i].To - _node.DayTimes[i].From).ToString(@"hh\:mm\:ss");
+                    dataGridView1.Rows[rowId].Cells[ColTimeAllowed.Index].Value = value.MinutesAllowed;
+                    dataGridView1.Rows[rowId].Cells[ColTime.Index].Value = (value.To - value.From).ToString(@"hh\:mm\:ss");
+                }
             }
+
             CalculateRowId();
 
             txtName.Text = node.Name;
@@ -188,6 +244,20 @@ namespace TimeAndAttendanceSystem.Controls
             CalculateTime();
         }
 
+        private void EnsureValidTime(DataGridViewRow row, int cellIndex, DateTime min, DateTime max, string errorMessage)
+        {
+            var time = DateTime.Parse(row.Cells[cellIndex].Value.ToString());
+            if (time.TimeOfDay > max.TimeOfDay)
+            {
+                row.Cells[cellIndex].Value = min.ToShortTimeString();
+                row.Cells[cellIndex].ErrorText = errorMessage;
+            }
+            else
+            {
+                row.Cells[cellIndex].ErrorText = null;
+            }
+        }
+
         private void ValidateTimes(DataGridView dataGridView)
         {
             foreach (DataGridViewRow row in dataGridView.Rows)
@@ -208,7 +278,6 @@ namespace TimeAndAttendanceSystem.Controls
                 DateTime dtLateTo = DateTime.Parse(row.Cells[ColLateTo.Index].Value.ToString());
 
                 // Get the values from column 1 and column 2
-
                 if (dtEarlyFrom.TimeOfDay > dtFrom.TimeOfDay)
                 {
                     row.Cells[ColEarlyFrom.Index].Value = dtFrom.ToShortTimeString();

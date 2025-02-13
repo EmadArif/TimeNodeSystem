@@ -1,6 +1,6 @@
-﻿
+﻿using TimeAndAttendanceSystem.PeriodNodes.Data;
 
-namespace TimeAndAttendanceSystem.Nodes
+namespace TimeAndAttendanceSystem.PeriodNodes.Interfaces
 {
     public interface INode : ICloneable
     {
@@ -10,13 +10,13 @@ namespace TimeAndAttendanceSystem.Nodes
         public Action<INode>? OnValueUpdated { get; set; }
         public string FullName => $"({Name})";
         public void Initalize(INode parentNode);
-        
+
         public void Update(INode parentNode)
         {
             OnValueUpdated?.Invoke(this);
         }
 
-        public bool Calculate(YearCalendar calendar, DateTime currentDate, int dayIndex);
+        public bool Calculate(YearCalendar calendar, int localDayIndex);
     }
     public interface IParentNode : INode
     {
@@ -40,4 +40,34 @@ namespace TimeAndAttendanceSystem.Nodes
 
     }
 
+    public interface IFromToTimeList
+    {
+        IEnumerable<IFromToTime> GetTimes { get;}
+
+        public void ClearTimes();
+        public void AddTime<T>(T value) where T : IFromToTime;
+    }
+    public interface ISwitchable
+    {
+        public bool Enabled { get; set; }
+    }
+    public interface IFromToTime
+    {
+        public string Name { get; set; }
+        public TimeSpan EarlyFrom { get; set; }
+        public TimeSpan From { get; set; }
+        public TimeSpan To { get; set; }
+        public TimeSpan LateTo { get; set; }
+        public int MinutesAllowed { get; set; }
+
+
+        public TimeSpan Time
+        {
+            get
+            {
+                return To - From;
+            }
+        }
+
+    }
 }

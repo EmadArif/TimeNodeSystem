@@ -2,6 +2,9 @@
 using TimeAndAttendanceSystem.Controls;
 using TimeAndAttendanceSystem.Nodes;
 using TimeAndAttendanceSystem.PeriodNodes;
+using TimeAndAttendanceSystem.PeriodNodes.Abstructs;
+using TimeAndAttendanceSystem.PeriodNodes.Data;
+using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
 namespace TimeAndAttendanceSystem.Helpers
 {
@@ -38,20 +41,7 @@ namespace TimeAndAttendanceSystem.Helpers
         {
             var propertiesPanel = (arg2!["propertiesPanel"] as Control)!;
 
-            propertiesPanel.Controls.Add(new NTimesTableControl((NDaysTimeNode)node)
-            {
-                Dock = DockStyle.Fill,
-                OnSave = () =>
-                {
-                    callback?.Invoke();
-                }
-            });
-        }
-        public static void WeeklyTableControl(INode node, Dictionary<string, object>? arg2, Action? callback)
-        {
-            var propertiesPanel = (arg2!["propertiesPanel"] as Control)!;
-
-            propertiesPanel.Controls.Add(new WeeklyTableControl((WeeklyNode)node)
+            propertiesPanel.Controls.Add(new NTimesTableControl((ChildNodeBase)node)
             {
                 Dock = DockStyle.Fill,
                 OnSave = () =>

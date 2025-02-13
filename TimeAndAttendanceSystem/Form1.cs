@@ -2,7 +2,7 @@ using System;
 using System.Drawing.Design;
 using System.Windows.Forms;
 using TimeAndAttendanceSystem.Helpers;
-using TimeAndAttendanceSystem.Nodes;
+using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
 namespace TimeAndAttendanceSystem
 {
@@ -135,7 +135,9 @@ namespace TimeAndAttendanceSystem
                 DataGridViewRow row = daysDgv.Rows[daysDgv.Rows.Add()];
                 if (row.IsNewRow)
                     continue; // Skip the new empty row
-                if(newMonth != currDate.Date.Month)
+                row.Visible = currDate.Enabled;
+
+                if (newMonth != currDate.Date.Month)
                 {
                     row.DefaultCellStyle.BackColor = Color.LightGray;
                     newMonth = currDate.Date.Month;
@@ -146,12 +148,14 @@ namespace TimeAndAttendanceSystem
                         row.DefaultCellStyle.BackColor = (Color)currDate.DateColor;
                 }
 
+                if (!row.Visible)
+                    continue;
+
                 row.Cells["Date"].Value = currDate.Date.ToShortDateString();
                 row.Cells["Day"].Value = currDate.Date.ToString("dddd");
                 row.Cells["From"].Value = currDate.FromTime.ToShortTimeString(); // Example: 8:00 AM
                 row.Cells["To"].Value = currDate.ToTime.ToShortTimeString(); // Example: 5:00 PM
                 row.Cells["Time"].Value = (currDate.ToTime - currDate.FromTime).ToString(@"hh\:mm\:ss");
-
             }
 
         }
@@ -225,15 +229,14 @@ namespace TimeAndAttendanceSystem
 
             return true;
         }
-        private bool ExecuteChild(INode node, DateTime executionDate, int dayIndex, Color? color)
+        private bool ExecuteChild(INode node, DateTime executionDate, int localDayIndex, Color? color)
         {
-
             var day = yearCalendars.FirstOrDefault(x => x.Date.Date == executionDate.Date);
             if (day == null)
                 return false;
 
             day.DateColor = color;
-            return node.Calculate(day!, executionDate, dayIndex);
+            return node.Calculate(day!, localDayIndex);
         }
 
         public static Color GetLightColor()

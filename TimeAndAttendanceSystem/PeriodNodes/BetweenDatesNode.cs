@@ -1,9 +1,12 @@
 ﻿
 
+using TimeAndAttendanceSystem.PeriodNodes.Abstructs;
+using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
+
 namespace TimeAndAttendanceSystem.Nodes
 {
 
-    public class BetweenDatesNode : ParentNode, ITwoDatesLimitedNode
+    public class BetweenDatesNode : ParentNodeBase, ITwoDatesLimitedNode
     {
         public string FullName => $"({Name})" + $" {DateOne.Year}/{DateOne.Month}/{DateOne.Day} - To {DateOne.Year}/{DateTwo.Month}/{DateTwo.Day}";
 
