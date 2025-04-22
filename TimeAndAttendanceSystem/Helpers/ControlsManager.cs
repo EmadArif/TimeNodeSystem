@@ -50,5 +50,19 @@ namespace TimeAndAttendanceSystem.Helpers
                 }
             });
         }
+
+        public static void HolidayTableControl(INode node, Dictionary<string, object>? arg2, Action? callback)
+        {
+            var propertiesPanel = (arg2!["propertiesPanel"] as Control)!;
+
+            propertiesPanel.Controls.Add(new HolidayTableControl((HolidayNode)node)
+            {
+                Dock = DockStyle.Fill,
+                OnSave = () =>
+                {
+                    callback?.Invoke();
+                }
+            });
+        }
     }
 }

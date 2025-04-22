@@ -1,6 +1,7 @@
 ﻿using System.Net.Mail;
 using TimeAndAttendanceSystem.Nodes;
 using TimeAndAttendanceSystem.PeriodNodes;
+using TimeAndAttendanceSystem.PeriodNodes.Abstructs;
 using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
 namespace TimeAndAttendanceSystem.Helpers
@@ -13,7 +14,8 @@ namespace TimeAndAttendanceSystem.Helpers
 
             new NDaysTimeNode { Id = Guid.NewGuid().ToString(), Name = "N Days Time", OnSelected = ControlsManager.NTimesTableControl },
             new WeeklyNode { Id = Guid.NewGuid().ToString(), Name = "Weekly", OnSelected = ControlsManager.NTimesTableControl },
-            new MonthlyNode { Id = Guid.NewGuid().ToString(), Name = "Monthly", OnSelected = ControlsManager.DefaultNodeControl },
+            new HolidayNode { Id = Guid.NewGuid().ToString(), Name = "Holiday", OnSelected = ControlsManager.HolidayTableControl },
+            new TestNode { Id = Guid.NewGuid().ToString(), Name = "TestNode", OnSelected = ControlsManager.DefaultNodeControl },
         ];
 
 

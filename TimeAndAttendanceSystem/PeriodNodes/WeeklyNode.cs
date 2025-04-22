@@ -47,7 +47,7 @@ namespace TimeAndAttendanceSystem.Nodes
                 calendar.FromTime = DateTime.Parse(Times[index].From.ToString());
                 calendar.ToTime = DateTime.Parse(Times[index].To.ToString());
             }
-            calendar.Enabled = index != -1;
+            //calendar.Enabled = index != -1;
 
             return true;
         }

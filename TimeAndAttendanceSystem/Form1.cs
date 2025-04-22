@@ -1,6 +1,4 @@
-using System;
-using System.Drawing.Design;
-using System.Windows.Forms;
+
 using TimeAndAttendanceSystem.Helpers;
 using TimeAndAttendanceSystem.PeriodNodes.Interfaces;
 
@@ -17,14 +15,16 @@ namespace TimeAndAttendanceSystem
 
             foreach (ToolStripMenuItem item in contextMenuStrip1.Items)
             {
-                if(item.Text == "Childern")
+                if (item.Text == "Childern")
                 {
                     item.DropDownItems.Clear();
                     foreach (var p in NodesManager.Periods.Where(x => x is not IParentNode))
                     {
-                        ToolStripMenuItem newItem = new ToolStripMenuItem(p.Name.ToString()); // Use the period's string representation as the item text
-                        newItem.Tag = p.Id; // Optionally, store the period object in the Tag property for later use
-                       
+                        ToolStripMenuItem newItem = new(p.Name.ToString())
+                        {
+                            Tag = p.Id // Optionally, store the period object in the Tag property for later use
+                        }; // Use the period's string representation as the item text
+
                         item.DropDownItems.Add(newItem); // Add the new item to the dropdown
                     }
                     item.DropDownItemClicked += OnPeriodSelected;
@@ -83,7 +83,7 @@ namespace TimeAndAttendanceSystem
         }
         private void MoveNodes(object? sender, ToolStripItemClickedEventArgs e)
         {
-            if(e.ClickedItem.Text == "Up")
+            if (e.ClickedItem.Text == "Up")
             {
                 if (treeView1.SelectedNode.Tag == null || treeView1.SelectedNode.Parent.Tag == null)
                     return;
@@ -91,7 +91,7 @@ namespace TimeAndAttendanceSystem
                 string parentId = treeView1.SelectedNode.Parent.Tag.ToString();
                 string childId = treeView1.SelectedNode.Tag.ToString();
 
-                if(NodesManager.MoveNodeUp(parentId, childId))
+                if (NodesManager.MoveNodeUp(parentId, childId))
                 {
                     MoveNodeUp(treeView1.SelectedNode);
                 }
@@ -144,8 +144,9 @@ namespace TimeAndAttendanceSystem
                 }
                 else
                 {
-                    if(currDate.DateColor != null)
+                    if (currDate.DateColor != null)
                         row.DefaultCellStyle.BackColor = (Color)currDate.DateColor;
+                    
                 }
 
                 if (!row.Visible)
@@ -162,13 +163,13 @@ namespace TimeAndAttendanceSystem
 
         private void TreeView1_KeyDown(object? sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Back)
+            if (e.KeyCode == Keys.Back)
             {
                 var id = treeView1.SelectedNode?.Tag;
                 if (id != null)
                 {
                     bool found = NodesManager.RemoveNodeById(id.ToString()!);
-                    if(found)
+                    if (found)
                     {
                         treeView1.Nodes.Remove(treeView1.SelectedNode!);
                     }
@@ -219,7 +220,7 @@ namespace TimeAndAttendanceSystem
                     // If the child is not a parent, execute it `numberOfDays` times
                     for (int i = 0; i < numberOfDays; i++)
                     {
-                        if(!ExecuteChild(child, twoDatesNode.DateOne.AddDays(i), i, color))
+                        if (!ExecuteChild(child, twoDatesNode.DateOne.AddDays(i), i, color))
                         {
                             return false;
                         }
@@ -275,11 +276,12 @@ namespace TimeAndAttendanceSystem
             {
                 var selectedNode = NodesManager.GetNodeById<INode>(id.ToString()!);
 
-                if(selectedNode != null)
+                if (selectedNode != null)
                 {
                     if (selectedNode is INode baseNode)
                     {
-                        Action? callback = ()=> {
+                        Action? callback = () =>
+                        {
                             UpdateFromParent(e.Node, baseNode);
                             TreeNodeHelper.RefreshTreeNodeFrom(treeView1.Nodes, selectedNode);
                             treeView1.Refresh();
@@ -298,7 +300,7 @@ namespace TimeAndAttendanceSystem
                     MessageBox.Show("Œÿ√ ›Ì «Œ Ì«— «·⁄ﬁœ…");
                 }
             }
-            
+
 
         }
 
@@ -337,7 +339,7 @@ namespace TimeAndAttendanceSystem
                         return;
 
                     var parentNode = NodesManager.GetNodeById<IParentNode>(parentId!.ToString()!);
-                    if(parentNode == null) return;
+                    if (parentNode == null) return;
 
                     NodesManager.AddChildNode(parentNode, cloneNode);
                     TreeNodeHelper.AddToTree(treeView1.SelectedNode, cloneNode);
@@ -356,9 +358,9 @@ namespace TimeAndAttendanceSystem
                     var parentId = treeView1.SelectedNode.Tag;
                     if (parentId == null)
                         return;
-                    var cloneNode = NodesManager.CloneChildNode( id, parentId);
+                    var cloneNode = NodesManager.CloneChildNode(id, parentId);
 
-                    if(cloneNode == null) return;
+                    if (cloneNode == null) return;
                     var parentNode = NodesManager.GetNodeById<IParentNode>(parentId!.ToString()!, NodesManager.AddedNodes);
                     if (parentNode == null) return;
                     NodesManager.AddChildNode(parentNode, cloneNode);
@@ -375,5 +377,6 @@ namespace TimeAndAttendanceSystem
                 contextMenuStrip1.Show(this, e.Location);
             }
         }
+
     }
 }

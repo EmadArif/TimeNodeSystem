@@ -23,7 +23,6 @@ namespace TimeAndAttendanceSystem.PeriodNodes.Abstructs
             if (value is WeeklyFromToTime v)
                 Times.Add(v);
         }
-
     }
 }
 

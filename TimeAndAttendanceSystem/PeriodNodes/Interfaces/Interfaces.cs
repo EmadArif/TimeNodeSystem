@@ -51,6 +51,11 @@ namespace TimeAndAttendanceSystem.PeriodNodes.Interfaces
     {
         public bool Enabled { get; set; }
     }
+    public interface IHoliday
+    {
+        public DayOfWeek? DayIndex { get; set; }
+
+    }
     public interface IFromToTime
     {
         public string Name { get; set; }
